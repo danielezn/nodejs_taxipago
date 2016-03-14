@@ -1,0 +1,32 @@
+extends layout
+
+block content
+	h1= title
+	p Welcome, please Signup!
+
+	p= available
+
+	form(name='signup', action='/signup', method='post')
+		p.label Usuario
+			input(type='text' name='username' id='username')
+			span(id="user-result")
+		p.label Clave
+			input(type='password', name='password')
+		p.label Nombre
+			input(type='text', name='name')
+		p.label Apellido
+			input(type='text', name='last_name')
+		p.label Telefono
+			input(type='text', name='phone')
+		p.label Placa
+			input(type='text', name='plate')
+		p.label Marca vehiculo
+			input(type='text', name='brand')
+		p.label Modelo
+			input(type='text', name='model')
+		p.label Fecha
+			input(type='text', name='year')
+		p.label Color
+			input(type='text', name='color')
+		p
+			input(type='submit', id="submit_btn" value='Iniciar sesion')

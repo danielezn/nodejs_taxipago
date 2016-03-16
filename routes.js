@@ -18,9 +18,19 @@ module.exports = function(app){
     res.render('login');
   });
 
-  app.post('login', function(req, res){
-    staticController.login(req.body, function(results){
-      res.render('panel',{results});
+  app.post('/login', function(req, res){
+    sessionHelper.authenticate(req.body.username, req.body.password, function(err, user){
+      if(err) throw err;
+      if(user){
+        req.session.regenerate(function(){
+          req.session.user = user;
+          req.session.success = 'Sesion iniciada exitosamente';
+          res.redirect('/panel');
+        });
+      }else{
+        req.session.error = 'Usuario o clave invalida';
+        res.redirect('/login');
+      }
     });
   });
 
@@ -29,27 +39,42 @@ module.exports = function(app){
   });
 
   app.get('/logout', function(req, res){
-    staticController.logout(req, function(){
+    req.session.destroy(function(){
       res.redirect('/');
     });
   });
 
   app.get('/panel', sessionHelper.requiredAuthentication, function(req, res){
-    res.render('panel');
+    res.render('panel',{user:req.session.user});
   });
 
   //
   //  User routes
   //    
-  app.get('/user', sessionHelper.requiredAuthentication, function(req, res){
+  app.get('/users', sessionHelper.requiredAuthentication, function(req, res){
     userController.getUsers(function(results){
       res.json(results);
     });
   });
 
+  app.get('/user/edit', sessionHelper.requiredAuthentication, function(req, res){
+    res.render('edit-user',{user:req.session.user});
+  });
+
+  app.post('/user/edit/:id', sessionHelper.requiredAuthentication, function(req, res){
+    userController.editUser(req.body, req.params.id, function(results){
+      if(results){
+              req.session.regenerate(function(){
+                  req.session.user = results.user;
+                  res.render('user', results.user)
+              });
+      }
+    });
+  });
+
   app.get('/user/:id', sessionHelper.requiredAuthentication, function(req, res){
     userController.getUserDetails(req.params.id, function(results){
-      res.json(results);
+      res.render('user',results);
     });
   }); 
 
@@ -68,12 +93,7 @@ module.exports = function(app){
     });
   });
 
-  app.put('/user/:id', sessionHelper.requiredAuthentication, function(req, res){
-    userController.editUser(req.body, req.params.id, function(results){
-      res.json(results);
-    });
-  });
-
+  
   app.delete('/user/:id', sessionHelper.requiredAuthentication, function(req, res){
     userController.deleteUser(req.params.id, function(results){
       res.json(results);

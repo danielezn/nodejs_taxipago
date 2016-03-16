@@ -1,7 +1,8 @@
 var mongoose = require('mongoose');
+var User     =  require('');
 
 var runSchema = mongoose.Schema({
-  id_user:            String,
+  id_user:            {type: Schema.ObjectId, ref:'Run'},
   source:             String,
   destination:        String,
   description:        String,

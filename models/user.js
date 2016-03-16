@@ -22,7 +22,8 @@ mongoose.connection;
 
 
 module.exports.userExist = function(username, callback){
-  User.find({username:username}, function(err, result){
+  User.findOne({username:username}, function(err, result){
+    if (err) throw err;
     callback(result);
   });
 }
@@ -35,13 +36,14 @@ module.exports.findAll = function(callback){
 }
 
 module.exports.findOne = function(id, callback){
-  User.findOne({_id: id}, function(err, result){
+  User.findById(id, function(err, result){
     if ( err ) throw err;
     callback(result);
   });
 }
 
 module.exports.addNewUser = function(body, callback){
+
   User.find({username:body.username}, function(err, result){
     if(!result.length){
       sessionHash(body.password, function(err, salt, hash){
@@ -58,18 +60,9 @@ module.exports.addNewUser = function(body, callback){
           year:       body.year,
           color:      body.color
         });
-
         user.save(function(err, result){
           if ( err ) throw err;
-            sessionHelper.authenticate(result.username, body.password, function(err, user){
-                  if(user){
-                      req.session.regenerate(function(){
-                          req.session.user = user;
-                          req.session.success = 'Authenticated as ' + user.username + ' click to <a href="/logout">logout</a>. ' + ' You may now access <a href="/restricted">/restricted</a>.';
-                          res.redirect('/panel');
-                      });
-                  }
-            });
+          console.log('Usuario creado exitosamente');         
           callback({
             messaage:"Usuario creado exitosamente",
             user:result
@@ -83,7 +76,7 @@ module.exports.addNewUser = function(body, callback){
 }
 
 module.exports.editUser = function(body, id, callback){
-  User.findOne({_id: id}, function(err, result){
+  User.findById(id, function(err, result){
     if ( err ) throw err;
 
     if(!result){

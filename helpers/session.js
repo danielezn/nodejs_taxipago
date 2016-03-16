@@ -1,17 +1,11 @@
-var express = require('express'),
-    User = require('../models/user.js');
+var express       = require('express'),
+    User          = require('../models/user.js'),
+    sessionHash   = require('./hash').hash;
 
-module.exports.authenticate = function(usuario, pass, fn) {
-    if (!module.parent) console.log('authenticating %s:%s', usuario, pass);
-
-    User.findOne({
-        usuario: usuario
-    },
-
-    function (err, user) {
+module.exports.authenticate = function(username, pass, fn) {
+    User.userExist(username, function (user) {
         if (user) {
-            if (err) return fn(new Error('cannot find user'));
-            hash(pass, user.salt, function (err, hash) {
+            sessionHash(pass, user.salt, function (err, hash) {
                 if (err) return fn(err);
                 if (hash == user.hash) return fn(null, user);
                 fn(new Error('invalid password'));
@@ -43,10 +37,10 @@ module.exports.requiredSameAuthentication = function(req, res, next) {
 
 module.exports.userExist = function(req, res, next) {
     User.userExist(req.body.username, function(result){
-        if(!result.length){
-            res.json({available:true});
-        }else{
+        if(result){
             res.json({available:false});
+        }else{
+            res.json({available:true});
         }
     });
 }

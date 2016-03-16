@@ -5,13 +5,13 @@ module.exports.getUsers = function(callback){
   user.findAll(callback);
 }
 
-module.exports.getUserDetails = function(params, callback){
-  console.log("Fetching details for book with plate: " + params._id);
-  user.findOne(params._id, callback);
+module.exports.getUserDetails = function(id, callback){
+  console.log("Fetching details for book with plate: " + id);
+  user.findOne(id, callback);
 }
 
 module.exports.addNewUser = function(body, callback){
-  console.log("Agregando usuario");
+  console.log('Agregando nuevo usuario');
   user.addNewUser(body, callback);
 }
 

@@ -48,14 +48,23 @@ module.exports = function(app){
   });
 
   app.get('/user/:id', sessionHelper.requiredAuthentication, function(req, res){
-    userController.getUserDetails(req.params, function(results){
+    userController.getUserDetails(req.params.id, function(results){
       res.json(results);
     });
-  });
+  }); 
 
   app.post('/signup', function(req, res){
     userController.addNewUser(req.body, function(results){
-      res.redirect('/panel');
+        sessionHelper.authenticate(results.user.username, req.body.password, function(err, user){
+          if (err) throw err;
+          if(user){
+              req.session.regenerate(function(){
+                  req.session.user = user;
+                  req.session.success = 'Authenticated as ' + req.body.username + ' click to <a href="/logout">logout</a>. ' + ' You may now access <a href="/restricted">/restricted</a>.';
+                  res.redirect('/panel');
+              });
+          }
+        });
     });
   });
 
